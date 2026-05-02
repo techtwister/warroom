@@ -1,0 +1,775 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Rohit's 30-Day War Room</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Mono:wght@400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #0a1628;
+    --navy2: #0f2040;
+    --blue: #1a56db;
+    --blue2: #2563eb;
+    --cyan: #06b6d4;
+    --gold: #f59e0b;
+    --green: #10b981;
+    --red: #ef4444;
+    --orange: #f97316;
+    --white: #f8fafc;
+    --gray: #94a3b8;
+    --gray2: #1e2d45;
+    --card: #0d1f38;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--navy);
+    color: var(--white);
+    min-height: 100vh;
+    padding-bottom: 40px;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    background: linear-gradient(135deg, #0a1628 0%, #0f2a4a 50%, #0a1628 100%);
+    padding: 28px 20px 20px;
+    border-bottom: 1px solid rgba(26,86,219,0.3);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    backdrop-filter: blur(12px);
+  }
+
+  .header-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 20px;
+    font-weight: 800;
+    letter-spacing: -0.5px;
+  }
+
+  .logo span { color: var(--cyan); }
+
+  .progress-pill {
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    background: rgba(6,182,212,0.15);
+    color: var(--cyan);
+    border: 1px solid rgba(6,182,212,0.3);
+    padding: 4px 10px;
+    border-radius: 20px;
+  }
+
+  /* ── DATE PICKER ── */
+  .date-section {
+    padding: 0 20px;
+    margin-bottom: 4px;
+  }
+
+  .date-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gray);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+    display: block;
+  }
+
+  .date-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 8px;
+    scrollbar-width: none;
+  }
+
+  .date-scroll::-webkit-scrollbar { display: none; }
+
+  .date-chip {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px 14px;
+    border-radius: 14px;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    background: var(--card);
+    cursor: pointer;
+    transition: all 0.2s ease;
+    min-width: 58px;
+  }
+
+  .date-chip:hover { border-color: var(--blue2); }
+
+  .date-chip.active {
+    background: var(--blue2);
+    border-color: var(--blue2);
+    box-shadow: 0 0 20px rgba(37,99,235,0.4);
+  }
+
+  .date-chip.completed {
+    border-color: rgba(16,185,129,0.4);
+    background: rgba(16,185,129,0.1);
+  }
+
+  .date-chip.today-chip {
+    border-color: var(--gold);
+  }
+
+  .chip-day {
+    font-family: 'Syne', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1;
+  }
+
+  .chip-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 3px;
+    text-transform: uppercase;
+  }
+
+  .date-chip.active .chip-label { color: rgba(255,255,255,0.8); }
+
+  .chip-dot {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--green);
+    margin-top: 4px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .main { padding: 20px; }
+
+  /* ── DAY HEADER ── */
+  .day-header {
+    margin-bottom: 20px;
+    animation: fadeUp 0.3s ease;
+  }
+
+  .day-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+  }
+
+  .day-number {
+    font-family: 'Syne', sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+    line-height: 1;
+    color: var(--white);
+  }
+
+  .day-number span { color: var(--cyan); }
+
+  .phase-tag {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    padding: 4px 10px;
+    border-radius: 6px;
+    background: rgba(26,86,219,0.2);
+    color: var(--cyan);
+    border: 1px solid rgba(6,182,212,0.2);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .day-date-full {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    color: var(--gray);
+    margin-top: 4px;
+  }
+
+  /* ── PROGRESS BAR ── */
+  .progress-section {
+    margin-bottom: 20px;
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255,255,255,0.06);
+    animation: fadeUp 0.3s ease 0.05s both;
+  }
+
+  .progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .progress-title {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gray);
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .progress-count {
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--cyan);
+  }
+
+  .progress-bar-bg {
+    height: 6px;
+    background: rgba(255,255,255,0.08);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--blue2), var(--cyan));
+    transition: width 0.6s cubic-bezier(0.4,0,0.2,1);
+  }
+
+  /* ── TASK CARDS ── */
+  .tasks-container { display: flex; flex-direction: column; gap: 10px; }
+
+  .task-section-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 10px;
+    color: var(--gray);
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    margin-top: 8px;
+    margin-bottom: 4px;
+    padding-left: 2px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .task-section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: rgba(255,255,255,0.06);
+  }
+
+  .task-card {
+    background: var(--card);
+    border-radius: 14px;
+    padding: 14px 16px;
+    border: 1.5px solid rgba(255,255,255,0.06);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    animation: fadeUp 0.3s ease both;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .task-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    border-radius: 3px 0 0 3px;
+  }
+
+  .task-card.morning::before { background: var(--gold); }
+  .task-card.office::before { background: var(--blue2); }
+  .task-card.evening::before { background: var(--cyan); }
+  .task-card.deliverable::before { background: var(--green); }
+
+  .task-card:active { transform: scale(0.98); }
+  .task-card.done { opacity: 0.6; }
+  .task-card.done .task-text { text-decoration: line-through; color: var(--gray); }
+
+  /* ── CHECKBOX ── */
+  .checkbox {
+    width: 22px;
+    height: 22px;
+    border-radius: 7px;
+    border: 2px solid rgba(255,255,255,0.2);
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 1px;
+    transition: all 0.2s ease;
+    background: rgba(255,255,255,0.04);
+  }
+
+  .task-card.done .checkbox {
+    background: var(--green);
+    border-color: var(--green);
+  }
+
+  .task-card.morning .checkbox { border-color: rgba(245,158,11,0.4); }
+  .task-card.office .checkbox { border-color: rgba(37,99,235,0.4); }
+  .task-card.evening .checkbox { border-color: rgba(6,182,212,0.4); }
+  .task-card.deliverable .checkbox { border-color: rgba(16,185,129,0.4); }
+
+  .checkmark {
+    display: none;
+    color: white;
+    font-size: 13px;
+    font-weight: bold;
+  }
+
+  .task-card.done .checkmark { display: block; }
+
+  .task-content { flex: 1; min-width: 0; }
+
+  .task-type-badge {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    margin-bottom: 4px;
+    opacity: 0.7;
+  }
+
+  .task-card.morning .task-type-badge { color: var(--gold); }
+  .task-card.office .task-type-badge { color: var(--blue2); }
+  .task-card.evening .task-type-badge { color: var(--cyan); }
+  .task-card.deliverable .task-type-badge { color: var(--green); }
+
+  .task-text {
+    font-size: 14px;
+    font-weight: 400;
+    line-height: 1.4;
+    color: var(--white);
+    transition: all 0.2s;
+  }
+
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--gray);
+    animation: fadeUp 0.3s ease;
+  }
+
+  .empty-icon { font-size: 40px; margin-bottom: 12px; }
+  .empty-title { font-family: 'Syne', sans-serif; font-size: 18px; color: var(--white); margin-bottom: 6px; }
+  .empty-sub { font-size: 13px; }
+
+  /* ── OVERALL STATS ── */
+  .stats-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+    animation: fadeUp 0.3s ease 0.1s both;
+  }
+
+  .stat-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 12px;
+    border: 1px solid rgba(255,255,255,0.06);
+    text-align: center;
+  }
+
+  .stat-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 3px;
+  }
+
+  .stat-label {
+    font-family: 'DM Mono', monospace;
+    font-size: 9px;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── TODAY BUTTON ── */
+  .today-btn {
+    position: fixed;
+    bottom: 24px;
+    right: 20px;
+    background: var(--blue2);
+    color: white;
+    border: none;
+    border-radius: 50px;
+    padding: 12px 20px;
+    font-family: 'Syne', sans-serif;
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 8px 24px rgba(37,99,235,0.4);
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    z-index: 200;
+  }
+
+  .today-btn:active { transform: scale(0.96); }
+
+  /* ── COMPLETE ALL BUTTON ── */
+  .action-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+    animation: fadeUp 0.3s ease 0.15s both;
+  }
+
+  .action-btn {
+    flex: 1;
+    padding: 11px;
+    border-radius: 10px;
+    border: 1.5px solid rgba(255,255,255,0.1);
+    background: rgba(255,255,255,0.04);
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .action-btn:active { transform: scale(0.97); }
+  .action-btn.primary {
+    background: rgba(37,99,235,0.2);
+    border-color: rgba(37,99,235,0.4);
+    color: var(--cyan);
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes checkPop {
+    0% { transform: scale(0.8); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+  }
+
+  .check-animate { animation: checkPop 0.2s ease; }
+
+  /* ── STREAK ── */
+  .streak-banner {
+    background: linear-gradient(135deg, rgba(245,158,11,0.15), rgba(249,115,22,0.1));
+    border: 1px solid rgba(245,158,11,0.25);
+    border-radius: 12px;
+    padding: 12px 16px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    animation: fadeUp 0.3s ease 0.2s both;
+  }
+
+  .streak-icon { font-size: 22px; }
+  .streak-text { font-family: 'DM Sans', sans-serif; font-size: 13px; }
+  .streak-text strong { color: var(--gold); font-family: 'Syne', sans-serif; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div class="logo">War<span>Room</span> 30</div>
+    <div class="progress-pill" id="overallPill">0 / 30 days</div>
+  </div>
+  <div class="date-section">
+    <span class="date-label">Select Day</span>
+    <div class="date-scroll" id="dateScroll"></div>
+  </div>
+</div>
+
+<div class="main">
+  <div id="content"></div>
+</div>
+
+<button class="today-btn" onclick="jumpToToday()">⚡ Today</button>
+
+<script>
+const TASKS = [
+  { day: 1, date: "Wed, Apr 30", phase: "Python Foundations", morning: "Intro & Setup + Fundamentals (Variables, Types, Typecasting)", office: "Unit converter (temp, currency, distance)", evening: "Intro to DS + Conda Env", deliverable: "Unit converter pushed to GitHub" },
+  { day: 2, date: "Thu, May 1", phase: "Python Foundations", morning: "Operators, User Input, Comments, Print", office: "BMI calculator + Simple calculator", evening: "DS Python Refresher: Variables, Strings, Operators", deliverable: "Calculators pushed to GitHub" },
+  { day: 3, date: "Fri, May 2", phase: "Python Foundations", morning: "Control Flow (If-Else, Match Case) + For Loops", office: "Rock-paper-scissors + Grade calculator", evening: "DS Python Refresher: Conditionals, Loops, Lists", deliverable: "Two games pushed to GitHub" },
+  { day: 4, date: "Sat, May 3", phase: "Python Foundations", morning: "While Loops, Break/Continue + Strings intro", office: "Number guessing game + Loop patterns", evening: "DS Python Refresher: Tuples, Sets, Dicts, File Handling", deliverable: "Number guessing game + patterns" },
+  { day: 5, date: "Sun, May 4", phase: "Python Foundations", morning: "String Slicing, Methods, Formatting", office: "Password strength checker + Text analyzer", evening: "DS Python Refresher: JSON, OOP, List Comp, Lambda", deliverable: "Practice Set + Text analyzer" },
+  { day: 6, date: "Mon, May 5", phase: "Python Foundations", morning: "Functions (Defining, Arguments, Return, Lambda)", office: "Refactor Week 1 projects into functions", evening: "DS Project 1: Coders of Delhi (Watch)", deliverable: "Refactored calculator module" },
+  { day: 7, date: "Tue, May 6", phase: "Python Foundations", morning: "Recursion, Modules, Scope, Docstrings", office: "Expense tracker using modules", evening: "DS Project 1: Coders of Delhi (Code along)", deliverable: "Expense tracker + Practice set" },
+  { day: 8, date: "Wed, May 7", phase: "Data Structures & Pandas", morning: "Lists & Methods", office: "To-do list manager", evening: "NumPy: Arrays, Indexing, Slicing", deliverable: "To-do list manager" },
+  { day: 9, date: "Thu, May 8", phase: "Data Structures & Pandas", morning: "Tuples, Sets, Dictionaries", office: "Contact book + Word frequency counter", evening: "NumPy: Broadcasting, Math, Multidimensional", deliverable: "Contact book + Word frequency" },
+  { day: 10, date: "Fri, May 9", phase: "Data Structures & Pandas", morning: "Collections Practice + OOP Intro", office: "BankAccount class (Deposit, Withdraw)", evening: "Pandas: Getting Started, Data Structures", deliverable: "BankAccount class" },
+  { day: 11, date: "Sat, May 10", phase: "Data Structures & Pandas", morning: "Constructors, Attributes, Inheritance", office: "Savings & CurrentAccount (Inheritance)", evening: "Pandas: DataFrames, Selection, Filtering", deliverable: "Extended BankAccount system" },
+  { day: 12, date: "Sun, May 11", phase: "Data Structures & Pandas", morning: "Method Overriding, Operator Overloading", office: "Library Management System", evening: "Pandas: Data Cleaning, Pivot/Melt", deliverable: "Library System with OOP" },
+  { day: 13, date: "Mon, May 12", phase: "Data Structures & Pandas", morning: "Decorators, Getters/Setters, Static Methods", office: "@timer/@retry decorators + Library refactor", evening: "Pandas: Aggregation, Joining, CSVs", deliverable: "Decorated Library System" },
+  { day: 14, date: "Tue, May 13", phase: "Data Structures & Pandas", morning: "Exception Handling, Map/Filter/Reduce", office: "Data pipeline (CSV Clean/Filter)", evening: "DS Project 2: Coders of Bangalore (Code along)", deliverable: "Data pipeline + Practice set" },
+  { day: 15, date: "Wed, May 14", phase: "File I/O & Flask", morning: "File I/O (Read/Write) + OS/Shutil", office: "Diary app + File organizer", evening: "Matplotlib: Charts, Bar, Pie, Stack", deliverable: "Diary app + File organizer" },
+  { day: 16, date: "Thu, May 15", phase: "File I/O & Flask", morning: "CLI Utilities + File Handling Practice", office: "Backup utility + CLI (argparse)", evening: "Matplotlib: Histograms, Scatter, Subplots", deliverable: "Backup utility with CLI" },
+  { day: 17, date: "Fri, May 16", phase: "File I/O & Flask", morning: "Venv, Requests, Regex, Multithreading", office: "API logic (Weather data fetcher)", evening: "Seaborn: Introduction & Basic Plots", deliverable: "Weather fetcher + Regex solutions" },
+  { day: 18, date: "Sat, May 17", phase: "File I/O & Flask", morning: "AI for Developers (Debugging/Optimization)", office: "Optimize File Organizer using Gemini", evening: "DS: Web Scraping & BeautifulSoup", deliverable: "Optimized file organizer" },
+  { day: 19, date: "Sun, May 18", phase: "File I/O & Flask", morning: "Hands-on Projects", office: "ScriptAI PA Database Schema (SQL)", evening: "SQL: Databases, Tables, CRUD", deliverable: "ScriptAI DB schema + Calculator with history" },
+  { day: 20, date: "Mon, May 19", phase: "File I/O & Flask", morning: "News App, AI Assistant, QR Generator", office: "News aggregator (API Integration)", evening: "SQL: Joins, Union, Views, Indexes", deliverable: "News aggregator" },
+  { day: 21, date: "Tue, May 20", phase: "File I/O & Flask", morning: "Flask Intro, First App", office: "Flask 'Hello World' with 3 routes", evening: "SQL: Subqueries, Group By, Stored Procs", deliverable: "Flask Hello World" },
+  { day: 22, date: "Wed, May 21", phase: "ML & Web Apps", morning: "Flask Forms, Jinja2", office: "Portfolio site (3 pages) + Contact form", evening: "Probability Theory & Bayes", deliverable: "Portfolio site with form" },
+  { day: 23, date: "Thu, May 22", phase: "ML & Web Apps", morning: "Template Inheritance, url_for, APIs", office: "Refactor Portfolio + To-do API", evening: "Distributions: Normal, Binomial, CLT", deliverable: "Flask API + Refactored Portfolio" },
+  { day: 24, date: "Fri, May 23", phase: "ML & Web Apps", morning: "Message Flashing + ScriptAI Architecture", office: "ScriptAI Architecture Design", evening: "ML Intro: Scikit-learn + First Model", deliverable: "ScriptAI architecture doc" },
+  { day: 25, date: "Sat, May 24", phase: "ML & Web Apps", morning: "Git Workflow & Tracking", office: "Simulate Git workflow in chat", evening: "ML Types: Supervised, Unsupervised, RL", deliverable: "Git workflow mastery" },
+  { day: 26, date: "Sun, May 25", phase: "ML & Web Apps", morning: "Git Branches, Merging, Remote", office: "Push all projects to GitHub with READMEs", evening: "Practical ML: EDA & Preprocessing", deliverable: "All projects on GitHub" },
+  { day: 27, date: "Mon, May 26", phase: "ML & Web Apps", morning: "Conclusion & Project Finalization", office: "Build new project (Quiz/Budget/Shortener)", evening: "Practical ML: Pipelines, Persistence", deliverable: "New project built" },
+  { day: 28, date: "Tue, May 27", phase: "ML & Web Apps", morning: "Final Assessment", office: "Debug all remaining issues", evening: "Deep Learning: Perceptron, TensorFlow, MNIST", deliverable: "Python Course Complete" },
+  { day: 29, date: "Wed, May 28", phase: "ML & Web Apps", morning: "DS Web Dev Planning", office: "Design DS Dashboard (Flask + Matplotlib)", evening: "DS Web Development for Scientists", deliverable: "DS dashboard design" },
+  { day: 30, date: "Thu, May 29", phase: "Final Integration", morning: "Course Completion", office: "Build ML-powered Flask Dashboard", evening: "LLMs + Leveraging AI + Conclusion", deliverable: "ML-powered Dashboard 🚀" },
+];
+
+const PHASE_COLORS = {
+  "Python Foundations": "#f59e0b",
+  "Data Structures & Pandas": "#8b5cf6",
+  "File I/O & Flask": "#06b6d4",
+  "ML & Web Apps": "#10b981",
+  "Final Integration": "#ef4444"
+};
+
+// State
+let selectedDay = 1;
+let completedTasks = JSON.parse(localStorage.getItem('warroom_tasks') || '{}');
+let completedDays = JSON.parse(localStorage.getItem('warroom_days') || '{}');
+
+function saveState() {
+  localStorage.setItem('warroom_tasks', JSON.stringify(completedTasks));
+  localStorage.setItem('warroom_days', JSON.stringify(completedDays));
+}
+
+function getTodayDay() {
+  const today = new Date();
+  const start = new Date('2026-04-30');
+  const diff = Math.floor((today - start) / (1000 * 60 * 60 * 24));
+  return Math.max(1, Math.min(30, diff + 1));
+}
+
+function isDayCompleted(day) {
+  const tasks = ['morning', 'office', 'evening', 'deliverable'];
+  return tasks.every(t => completedTasks[`${day}-${t}`]);
+}
+
+function getCompletedDaysCount() {
+  let count = 0;
+  for (let i = 1; i <= 30; i++) {
+    if (isDayCompleted(i)) count++;
+  }
+  return count;
+}
+
+function renderDateScroll() {
+  const scroll = document.getElementById('dateScroll');
+  const todayDay = getTodayDay();
+  scroll.innerHTML = '';
+
+  TASKS.forEach(task => {
+    const chip = document.createElement('div');
+    chip.className = 'date-chip' +
+      (task.day === selectedDay ? ' active' : '') +
+      (isDayCompleted(task.day) ? ' completed' : '') +
+      (task.day === todayDay ? ' today-chip' : '');
+
+    const shortDate = task.date.split(', ')[1].split(' ');
+    chip.innerHTML = `
+      <span class="chip-day">D${task.day}</span>
+      <span class="chip-label">${shortDate[0].substring(0,3)}</span>
+      ${isDayCompleted(task.day) ? '<div class="chip-dot"></div>' : ''}
+    `;
+
+    chip.addEventListener('click', () => {
+      selectedDay = task.day;
+      renderAll();
+      chip.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+    });
+
+    scroll.appendChild(chip);
+  });
+
+  // Scroll active chip into view
+  setTimeout(() => {
+    const activeChip = scroll.querySelector('.active');
+    if (activeChip) activeChip.scrollIntoView({ behavior: 'smooth', inline: 'center' });
+  }, 100);
+
+  // Update overall pill
+  const done = getCompletedDaysCount();
+  document.getElementById('overallPill').textContent = `${done} / 30 days`;
+}
+
+function renderContent() {
+  const task = TASKS[selectedDay - 1];
+  const todayDay = getTodayDay();
+  const content = document.getElementById('content');
+
+  // Count completed tasks for this day
+  const types = ['morning', 'office', 'evening', 'deliverable'];
+  const doneTasks = types.filter(t => completedTasks[`${selectedDay}-${t}`]).length;
+  const totalTasks = 4;
+
+  // Phase color
+  const phaseColor = PHASE_COLORS[task.phase] || '#1a56db';
+
+  let html = `
+    <div class="day-header">
+      <div class="day-badge">
+        <span class="day-number">Day <span>${task.day}</span></span>
+        <span class="phase-tag" style="color:${phaseColor};border-color:${phaseColor}40;background:${phaseColor}15">${task.phase}</span>
+      </div>
+      <div class="day-date-full">${task.date}${task.day === todayDay ? ' · <span style="color:#f59e0b">Today</span>' : ''}</div>
+    </div>
+
+    <div class="progress-section">
+      <div class="progress-header">
+        <span class="progress-title">Day Progress</span>
+        <span class="progress-count">${doneTasks} / ${totalTasks} tasks</span>
+      </div>
+      <div class="progress-bar-bg">
+        <div class="progress-bar-fill" style="width:${(doneTasks/totalTasks)*100}%"></div>
+      </div>
+    </div>
+  `;
+
+  // Stats row
+  const completedDaysCount = getCompletedDaysCount();
+  const totalCompleted = Object.keys(completedTasks).filter(k => completedTasks[k]).length;
+  html += `
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-value" style="color:#06b6d4">${completedDaysCount}</div>
+        <div class="stat-label">Days Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#10b981">${totalCompleted}</div>
+        <div class="stat-label">Tasks Done</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-value" style="color:#f59e0b">${30 - selectedDay}</div>
+        <div class="stat-label">Days Left</div>
+      </div>
+    </div>
+  `;
+
+  // Streak banner if day is completed
+  if (isDayCompleted(selectedDay)) {
+    html += `
+      <div class="streak-banner">
+        <span class="streak-icon">🔥</span>
+        <span class="streak-text"><strong>Day ${selectedDay} Complete!</strong> You crushed it. On to the next.</span>
+      </div>
+    `;
+  }
+
+  // Action buttons
+  html += `
+    <div class="action-row">
+      <button class="action-btn primary" onclick="markAllDone()">✓ Mark All Done</button>
+      <button class="action-btn" onclick="clearDay()">↺ Reset Day</button>
+    </div>
+  `;
+
+  // Tasks
+  const taskItems = [
+    { type: 'morning', label: '🌅 Morning Study', text: task.morning },
+    { type: 'office', label: '💻 Office Build', text: task.office },
+    { type: 'evening', label: '🌙 Evening DS', text: task.evening },
+    { type: 'deliverable', label: '🚀 Deliverable', text: task.deliverable },
+  ];
+
+  html += `<div class="tasks-container">`;
+
+  taskItems.forEach((item, i) => {
+    const key = `${selectedDay}-${item.type}`;
+    const done = completedTasks[key] || false;
+    html += `
+      <div class="task-section-label">${item.label}</div>
+      <div class="task-card ${item.type} ${done ? 'done' : ''}"
+           style="animation-delay:${i * 0.06}s"
+           onclick="toggleTask('${key}', this)">
+        <div class="checkbox">
+          <span class="checkmark">✓</span>
+        </div>
+        <div class="task-content">
+          <div class="task-type-badge">${item.type}</div>
+          <div class="task-text">${item.text}</div>
+        </div>
+      </div>
+    `;
+  });
+
+  html += `</div>`;
+
+  content.innerHTML = html;
+}
+
+function toggleTask(key, card) {
+  completedTasks[key] = !completedTasks[key];
+  saveState();
+  card.classList.toggle('done');
+  card.querySelector('.checkbox').classList.add('check-animate');
+  setTimeout(() => card.querySelector('.checkbox').classList.remove('check-animate'), 200);
+
+  // Update progress bar
+  const types = ['morning', 'office', 'evening', 'deliverable'];
+  const doneTasks = types.filter(t => completedTasks[`${selectedDay}-${t}`]).length;
+  const fill = document.querySelector('.progress-bar-fill');
+  const count = document.querySelector('.progress-count');
+  if (fill) fill.style.width = `${(doneTasks/4)*100}%`;
+  if (count) count.textContent = `${doneTasks} / 4 tasks`;
+
+  // Re-render if all done to show streak banner
+  if (doneTasks === 4 || doneTasks === 3) {
+    setTimeout(() => renderAll(), 300);
+  }
+
+  renderDateScroll();
+}
+
+function markAllDone() {
+  const types = ['morning', 'office', 'evening', 'deliverable'];
+  types.forEach(t => { completedTasks[`${selectedDay}-${t}`] = true; });
+  saveState();
+  renderAll();
+}
+
+function clearDay() {
+  const types = ['morning', 'office', 'evening', 'deliverable'];
+  types.forEach(t => { completedTasks[`${selectedDay}-${t}`] = false; });
+  saveState();
+  renderAll();
+}
+
+function jumpToToday() {
+  selectedDay = getTodayDay();
+  renderAll();
+}
+
+function renderAll() {
+  renderDateScroll();
+  renderContent();
+}
+
+// Init
+renderAll();
+</script>
+</body>
+</html>
